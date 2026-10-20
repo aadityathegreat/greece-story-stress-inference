@@ -1,0 +1,17 @@
+name: Hardware probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Measure actual capacity
+        run: |
+          python3 - <<'PYCODE'
+          import json,os,shutil
+          from pathlib import Path
+          mem={x.split(':')[0]:int(x.split()[1])*1024 for x in Path('/proc/meminfo').read_text().splitlines() if x.split()[1].isdigit()}
+          print(json.dumps({'cpu_count':os.cpu_count(),'memory_total_bytes':mem['MemTotal'],'memory_available_bytes':mem['MemAvailable'],'disk_free_bytes':shutil.disk_usage('.').free}))
+          PYCODE
